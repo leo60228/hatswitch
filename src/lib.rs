@@ -1,7 +1,9 @@
 use nom::branch;
 use nom::bytes::complete as bytes;
 use nom::combinator;
+use nom::number::complete as number;
 use nom::sequence;
+use nom::multi;
 use nom::IResult as DefaultIResult;
 
 type IResult<T1, T2> = DefaultIResult<T1, T2, nom::error::VerboseError<T1>>;
@@ -9,18 +11,20 @@ type IResult<T1, T2> = DefaultIResult<T1, T2, nom::error::VerboseError<T1>>;
 #[derive(Debug)]
 pub struct GameState<'a> {
     pub header: &'a [u8],
-    pub entry: Vec<Entry<'a>>,
+    pub entries: Vec<Entry<'a>>,
 }
 
 #[derive(Debug)]
 pub struct Entry<'a> {
-    pub unknown: &'a [u8],
     pub typ: EntryType,
-    pub unknown2: &'a [u8],
+    pub unknown: &'a [u8],
     pub name: String,
+    pub raw_length: Option<u64>,
+    pub magic: Option<u32>,
+    data: Vec<u8>,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum EntryType {
     File,
     Directory,
@@ -33,7 +37,6 @@ fn c_str(inp: &[u8]) -> IResult<&[u8], String> {
 }
 
 fn entry_type(inp: &[u8]) -> IResult<&[u8], EntryType> {
-    dbg!(&inp[..4]);
     branch::alt((
         combinator::value(
             EntryType::File,
@@ -47,30 +50,37 @@ fn entry_type(inp: &[u8]) -> IResult<&[u8], EntryType> {
 }
 
 pub fn entry(inp: &[u8]) -> IResult<&[u8], Entry> {
-    let (r, (unknown, typ, unknown2, name)) = sequence::tuple((
-        bytes::take(4usize),
+    let (r, (typ, unknown, name)) = sequence::tuple((
         entry_type,
         bytes::take(28usize),
         c_str,
     ))(inp)?;
+    let (r, (raw_length, magic, data, _)) = sequence::tuple((
+        combinator::cond(typ == EntryType::File, number::le_u64),
+        combinator::cond(typ == EntryType::File, number::le_u32),
+        branch::alt((bytes::take_until(b"\xb1\xca" as &[u8]), combinator::rest)),
+        combinator::opt(bytes::tag(b"\xb1\xca" as &[u8])),
+    ))(r)?;
     Ok((
         r,
         Entry {
-            unknown,
             typ,
-            unknown2,
+            unknown,
             name,
+            raw_length,
+            magic,
+            data: data.into(),
         },
     ))
 }
 
 pub fn gamestate(inp: &[u8]) -> IResult<&[u8], GameState> {
-    let (r, (header, entry)) = sequence::tuple((bytes::take(6usize), entry))(inp)?;
+    let (r, (header, entries)) = sequence::tuple((bytes::take(10usize), multi::many0(entry)))(inp)?;
     Ok((
         r,
         GameState {
             header,
-            entry: vec![entry],
+            entries,
         },
     ))
 }
