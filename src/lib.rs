@@ -1,9 +1,9 @@
 use nom::branch;
 use nom::bytes::complete as bytes;
 use nom::combinator;
+use nom::multi;
 use nom::number::complete as number;
 use nom::sequence;
-use nom::multi;
 use nom::IResult as DefaultIResult;
 
 type IResult<T1, T2> = DefaultIResult<T1, T2, nom::error::VerboseError<T1>>;
@@ -50,11 +50,8 @@ fn entry_type(inp: &[u8]) -> IResult<&[u8], EntryType> {
 }
 
 pub fn entry(inp: &[u8]) -> IResult<&[u8], Entry> {
-    let (r, (typ, unknown, name)) = sequence::tuple((
-        entry_type,
-        bytes::take(28usize),
-        c_str,
-    ))(inp)?;
+    let (r, (typ, unknown, name)) =
+        sequence::tuple((entry_type, bytes::take(28usize), c_str))(inp)?;
     let (r, (raw_length, magic, data, _)) = sequence::tuple((
         combinator::cond(typ == EntryType::File, number::le_u64),
         combinator::cond(typ == EntryType::File, number::le_u32),
@@ -76,13 +73,7 @@ pub fn entry(inp: &[u8]) -> IResult<&[u8], Entry> {
 
 pub fn gamestate(inp: &[u8]) -> IResult<&[u8], GameState> {
     let (r, (header, entries)) = sequence::tuple((bytes::take(10usize), multi::many0(entry)))(inp)?;
-    Ok((
-        r,
-        GameState {
-            header,
-            entries,
-        },
-    ))
+    Ok((r, GameState { header, entries }))
 }
 
 #[cfg(test)]
