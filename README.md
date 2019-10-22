@@ -11,7 +11,8 @@
 | Length | Description |
 | --- | --- |
 | 6 | 0xb1ca2097b481 for files, 0x01a420b2fd41 for directories |
-| 28 | Unknown |
+| 26 | Unknown |
+| 2 | u16 little-endian: length of path not including null terminator |
 | ? | Null-terminated path |
 | | Remainder for files only |
 | 8 | Unknown, if interpreted as a little-endian u64, it's almost the length, but with a varying offset |
