@@ -37,6 +37,7 @@ Assuming this is the case, it's mostly identical to the PC version.
     * HatinTimeOnline.ini - Online party name, unused on Switch. Defaults to `meku` (I'm starting to sense a pattern here...).
     * HatinTimeSystemSettings.ini - Graphics settings
     * HatinTimeUI.ini - Unknown
+    * DefaultEngine.ini - List of packages to load from CookedPC/ (could this be used to load scripts?)
     * Switch/ - Contains overrides for HatinTime inis
     * Other folders contain settings for Wii U(!), Xbox One, and PS4. These are missing on PC.
   * CookedPC/ - Game data
