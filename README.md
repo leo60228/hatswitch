@@ -25,6 +25,7 @@ Due to the lack of working repacker, this is not able to be confirmed.
 This seemingly consists of the romfs overlayed with the `/w/DataChanges` directory in the save.
 Assuming this is the case, it's mostly identical to the PC version.
 
+* eon.txt - seems to be compilation logs from a user called "Meku" (hmmmmm)
 * Engine/ - seemingly nothing interesting
 * HatinTimeGame/ - vast majority of contents
   * Config/ - All settings applying to multiple save files
@@ -32,18 +33,31 @@ Assuming this is the case, it's mostly identical to the PC version.
     * HatinTimeGame.ini - Game configuration, nothing that looks interesting
     * HatinTimeInput.ini - List of buttons
     * HatinTimeLightmass.ini - Lighting configuration
-    * HatinTimeMods.ini - Empty on Switch, contains mod options on PC
-    * HatinTimeOnline.ini - Online party name, unused on Switch
+    * HatinTimeMods.ini - Empty on Switch, contains mod options on PC. In the initial update, this contains settings for the playable Beter Griffin mod. No, I don't know why.
+    * HatinTimeOnline.ini - Online party name, unused on Switch. Defaults to `meku` (I'm starting to sense a pattern here...).
     * HatinTimeSystemSettings.ini - Graphics settings
     * HatinTimeUI.ini - Unknown
     * Switch/ - Contains overrides for HatinTime inis
     * Other folders contain settings for Wii U(!), Xbox One, and PS4. These are missing on PC.
-  * Cooked/ - Game data
-    * Startup.upk - Most game data
-    * HatinTimeGame.u, HatinTimeGame_Content.u - Unknown
+  * CookedPC/ - Game data
+    * Startup.upk - Some game data (mostly scripts)
+    * HatinTimeGame.u, HatinTimeGameContent.u - Majority of non-texture assets and scripts
+    * Maps/ - Maps. All maps on PC and Switch can be replaced with others.
+      * TimeRift_Water/ - Blue time rifts
+      * TimeRift_Cave/ - Purple time rifts
+      * castle/ - The End
+      * chapter3/ - Battle of the Birds (yes, I know this is Chapter 2)
+      * DLC_CatMetro/ - Nyakuza Metro (this does exist on the Switch version, and is functional)
+      * harbor/ - Mafia Town
+      * hub/ - Spaceship
+      * literallycantsink/ - Arctic Cruise
+      * sandandsails/ - Alpine Skyline (this was originally a desert level, hence the filenames)
+      * subconforest/ - Subcon Forest
+      * system/ - Title screen and credits
     * Other files aren't very interesting
   * Localization/ - Dialogue
     * Folders for every supported language (INT is English)
       * Intuitively-named inis containing dialogue
   * SaveData/ - Save data
-    * saveX - zero-indexed save slots, unknown format
+    * saveX - Zero-indexed save slots, unknown format. Saves can put put in the romfs, and they will be copied to the save file upon loading. The format is compatible with PC, despite differing filenames.
+  
