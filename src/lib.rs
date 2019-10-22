@@ -48,9 +48,9 @@ fn first_match<'a>(strings: &'a [&[u8]]) -> impl Fn(&[u8]) -> IResult<&[u8], &[u
     move |inp| {
         let possibilities = strings.iter().copied().map(|s| bytes::take_until(s)(inp));
         possibilities
-            .min_by_key(|r| {
-                if let Ok((_, o)) = r {
-                    o.len() as isize
+            .max_by_key(|r| {
+                if let Ok((r, _)) = r {
+                    r.len() as isize
                 } else {
                     -1
                 }
