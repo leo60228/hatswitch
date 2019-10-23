@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use std::borrow::Cow;
 
 pub mod parser;
 pub use parser::gamestate as parse;
@@ -18,7 +19,7 @@ pub struct Entry<'a> {
     pub access: DateTime<Utc>,
     pub modify: DateTime<Utc>,
     pub name: String,
-    pub data: &'a [u8],
+    pub data: Cow<'a, [u8]>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

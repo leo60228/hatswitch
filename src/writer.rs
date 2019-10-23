@@ -38,7 +38,7 @@ pub fn entry(w: &mut dyn Write, entry: &Entry) -> io::Result<()> {
     if entry.typ == EntryType::File {
         w.write_u64::<LittleEndian>(entry.data.len() as u64)?;
         w.write_all(&[0xe9, 0xb7, 0x12, 0x3a])?;
-        w.write_all(entry.data)?;
+        w.write_all(&entry.data)?;
     }
     Ok(())
 }

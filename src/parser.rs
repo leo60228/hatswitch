@@ -68,7 +68,7 @@ pub fn entry(inp: &[u8]) -> IResult<&[u8], Entry> {
             access,
             modify,
             name,
-            data,
+            data: data.into(),
         },
     ))
 }
