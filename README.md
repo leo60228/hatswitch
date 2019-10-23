@@ -4,7 +4,7 @@
 ### GameState
 | Length | Description |
 | --- | --- |
-| 8 | Unknown |
+| 8 | Magic 0x1322b2e5a80410dc |
 | ? | Entries |
 
 ### Entry
