@@ -65,10 +65,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     continue;
                 }
                 let mut path = PathBuf::from("/");
-                path.push(entry
-                    .path()
-                    .strip_prefix(&dir)
-                    .unwrap_or_else(|_| entry.path()));
+                path.push(
+                    entry
+                        .path()
+                        .strip_prefix(&dir)
+                        .unwrap_or_else(|_| entry.path()),
+                );
 
                 if let Some(parent) = path.parent() {
                     if !dirs.contains(parent) {
