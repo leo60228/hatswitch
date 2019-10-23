@@ -1,6 +1,7 @@
 use super::*;
 use byteorder::{LittleEndian, WriteBytesExt};
 use chrono::{DateTime, Utc};
+use crc::crc32;
 use std::convert::TryInto;
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
@@ -42,12 +43,21 @@ pub fn entry(w: &mut dyn Write, entry: &Entry) -> io::Result<()> {
     Ok(())
 }
 
-pub fn gamestate(w: &mut dyn Write, gamestate: &GameState) -> io::Result<()> {
+pub fn gamestate_nochecksum(w: &mut dyn Write, gamestate: &GameState) -> io::Result<()> {
     w.write_all(&[
         0x13u8, 0x22u8, 0xb2u8, 0xe5u8, 0xa8u8, 0x04u8, 0x10u8, 0xdcu8,
     ])?; // magic
     for e in &gamestate.entries {
         entry(w, e)?;
     }
+    Ok(())
+}
+
+pub fn gamestate(w: &mut dyn Write, gamestate: &GameState) -> io::Result<()> {
+    let mut cursor = io::Cursor::new(vec![]);
+    gamestate_nochecksum(&mut cursor, gamestate)?;
+    let data = cursor.into_inner();
+    w.write_all(&data)?;
+    w.write_u32::<LittleEndian>(crc32::checksum_ieee(&data))?;
     Ok(())
 }
