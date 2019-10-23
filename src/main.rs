@@ -27,10 +27,6 @@ fn main() {
                 entry.modify,
                 entry.data.len()
             );
-            if let Some(len) = entry.raw_length {
-                let diff: isize = (entry.data.len() as isize) - (len as isize);
-                print!("|{:x}|{}", len, diff);
-            }
             print!("\n");
         }
     }

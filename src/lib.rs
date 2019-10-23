@@ -11,20 +11,17 @@ type IResult<T1, T2> = DefaultIResult<T1, T2, nom::error::VerboseError<T1>>;
 
 #[derive(Debug)]
 pub struct GameState<'a> {
-    pub header: &'a [u8],
-    pub entries: Vec<Entry>,
+    pub entries: Vec<Entry<'a>>,
 }
 
 #[derive(Debug)]
-pub struct Entry {
+pub struct Entry<'a> {
     pub typ: EntryType,
     pub create: DateTime<Utc>,
     pub access: DateTime<Utc>,
     pub modify: DateTime<Utc>,
     pub name: String,
-    pub raw_length: Option<u64>,
-    pub magic: Option<u32>,
-    pub data: Vec<u8>,
+    pub data: &'a [u8],
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -56,21 +53,6 @@ fn entry_type(inp: &[u8]) -> IResult<&[u8], EntryType> {
     ))(inp)
 }
 
-fn first_match<'a>(strings: &'a [&[u8]]) -> impl Fn(&[u8]) -> IResult<&[u8], &[u8]> + 'a {
-    move |inp| {
-        let possibilities = strings.iter().copied().map(|s| bytes::take_until(s)(inp));
-        possibilities
-            .max_by_key(|r| {
-                if let Ok((r, _)) = r {
-                    r.len() as isize
-                } else {
-                    -1
-                }
-            })
-            .unwrap()
-    }
-}
-
 fn windows_to_datetime(win: u64) -> DateTime<Utc> {
     const DIFFERENCE: i128 = 11644473600000 * 10000; // difference between windows epoch and unix epoch in 100ns
     let unix_100ns = ((win as i128) - DIFFERENCE) as i64;
@@ -85,14 +67,8 @@ fn filetime(inp: &[u8]) -> IResult<&[u8], DateTime<Utc>> {
 pub fn entry(inp: &[u8]) -> IResult<&[u8], Entry> {
     let (r, (typ, create, access, modify, _, name)) =
         sequence::tuple((entry_type, filetime, filetime, filetime, number::le_u16, c_str))(inp)?;
-    let (r, (raw_length, magic, data)) = sequence::tuple((
-        combinator::cond(typ == EntryType::File, number::le_u64),
-        combinator::cond(typ == EntryType::File, number::le_u32),
-        branch::alt((
-            first_match(&[&[0x01, 0xa4], &[0xb1, 0xca]]),
-            combinator::rest,
-        )),
-    ))(r)?;
+    let (r, length) = combinator::cond(typ == EntryType::File, sequence::terminated(number::le_u64, number::le_u32))(r)?;
+    let (r, data): (&[u8], &[u8]) = if let Some(length) = length { bytes::take(length)(r)? } else { (r, &[]) };
     Ok((
         r,
         Entry {
@@ -101,16 +77,14 @@ pub fn entry(inp: &[u8]) -> IResult<&[u8], Entry> {
             access,
             modify,
             name,
-            raw_length,
-            magic,
-            data: data.into(),
+            data,
         },
     ))
 }
 
 pub fn gamestate(inp: &[u8]) -> IResult<&[u8], GameState> {
-    let (r, (header, entries)) = sequence::tuple((bytes::take(8usize), multi::many0(entry)))(inp)?;
-    Ok((r, GameState { header, entries }))
+    let (r, (_, entries)) = sequence::tuple((bytes::take(8usize), multi::many0(entry)))(inp)?;
+    Ok((r, GameState { entries }))
 }
 
 #[cfg(test)]
