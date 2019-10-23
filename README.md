@@ -10,10 +10,10 @@
 ### Entry
 | Length | Description |
 | --- | --- |
-| 8 | 0xb1ca2097b481 for files, 0x01a420b2fd41 for directories |
-| 8 | FILETIME creation time |
-| 8 | FILETIME access time |
-| 8 | FILETIME modify time |
+| 8 | 0xb1ca2097b4810000 for files, 0x01a420b2fd410000 for directories |
+| 8 | Creation time |
+| 8 | Access time |
+| 8 | Modify time |
 | 2 | u16 little-endian: length of path not including null terminator |
 | ? | Null-terminated path |
 | | Remainder for files only |
@@ -23,6 +23,8 @@
 
 All paths are prefixed with `/w/DataChanges/`, and the remainder consists of a path in the romfs to seemingly replace.
 Due to the lack of working repacker, this is not able to be confirmed.
+
+Timestamps are specified using the [FILETIME Windows API struct](https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime).
 
 ## Filesystem
 This seemingly consists of the romfs overlayed with the `/w/DataChanges` directory in the save.
@@ -64,5 +66,3 @@ Assuming this is the case, it's mostly identical to the PC version.
       * Intuitively-named inis containing dialogue
   * SaveData/ - Save data
     * saveX - Zero-indexed save slots, unknown format. Saves can put put in the romfs, and they will be copied to the save file upon loading. The format is compatible with PC, despite differing filenames.
-  
-Timestamps are specified using the [FILETIME windows API struct](https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime)
