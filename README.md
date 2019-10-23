@@ -10,8 +10,10 @@
 ### Entry
 | Length | Description |
 | --- | --- |
-| 6 | 0xb1ca2097b481 for files, 0x01a420b2fd41 for directories |
-| 26 | Unknown |
+| 8 | 0xb1ca2097b481 for files, 0x01a420b2fd41 for directories |
+| 8 | FILETIME creation time |
+| 8 | FILETIME access time |
+| 8 | FILETIME modify time |
 | 2 | u16 little-endian: length of path not including null terminator |
 | ? | Null-terminated path |
 | | Remainder for files only |
@@ -63,3 +65,4 @@ Assuming this is the case, it's mostly identical to the PC version.
   * SaveData/ - Save data
     * saveX - Zero-indexed save slots, unknown format. Saves can put put in the romfs, and they will be copied to the save file upon loading. The format is compatible with PC, despite differing filenames.
   
+Timestamps are specified using the [FILETIME windows API struct](https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime)
