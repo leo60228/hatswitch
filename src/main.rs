@@ -1,7 +1,7 @@
+use hatswitch::EntryType;
 use std::env;
 use std::fs;
 use std::path::Path;
-use hatswitch::EntryType;
 
 fn main() {
     let file = env::args().nth(1).unwrap();
@@ -20,10 +20,13 @@ fn main() {
                     hatswitch::EntryType::Directory => "D",
                 }
             );
-            for byte in entry.unknown {
-                print!("{:02x}, ", byte);
-            }
-            print!("|{:x}", entry.data.len());
+            print!(
+                "{}|{}|{}|{:x}",
+                entry.create,
+                entry.access,
+                entry.modify,
+                entry.data.len()
+            );
             if let Some(len) = entry.raw_length {
                 let diff: isize = (entry.data.len() as isize) - (len as isize);
                 print!("|{:x}|{}", len, diff);
