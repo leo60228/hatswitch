@@ -5,31 +5,9 @@ use std::path::Path;
 
 fn main() {
     let file = env::args().nth(1).unwrap();
+    let out = env::args().nth(2).unwrap();
     let data = fs::read(file).unwrap();
-    let state = hatswitch::gamestate(&data).unwrap().1;
-    for i in 0..2 {
-        for entry in &state.entries {
-            if (i == 0) ^ (entry.typ == EntryType::Directory) {
-                continue;
-            }
-            print!(
-                "{}|{}|",
-                entry.name,
-                match entry.typ {
-                    hatswitch::EntryType::File => "F",
-                    hatswitch::EntryType::Directory => "D",
-                }
-            );
-            print!(
-                "{}|{}|{}|{:x}",
-                entry.create,
-                entry.access,
-                entry.modify,
-                entry.data.len()
-            );
-            print!("\n");
-        }
-    }
+    let state = hatswitch::parse(&data).unwrap().1;
     for entry in &state.entries {
         match entry.typ {
             EntryType::File => {
@@ -45,4 +23,11 @@ fn main() {
             }
         }
     }
+
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(out)
+        .unwrap();
+    hatswitch::write(&mut file, &state).unwrap();
 }
